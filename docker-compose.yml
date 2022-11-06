@@ -1,12 +1,47 @@
-version: '3,9'
+version: '3.9'
 
 services:
   app:
+    container_name: member_link
     build:
       context: .
       dockerfile: ./Dockerfile
+    tty: true
     ports:
-      - "3000:8080"
+      - "8080:8080"
+    env_file:
+      - mysql/.env
+    depends_on:
+      - db
     volumes:
       - ../member_link:/app
+    networks:
+      - member_link_network
+
+  db:
+    container_name: db
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
     tty: true
+    platform: linux/x86_64
+    ports:
+      - 3306:3306
+    env_file:
+      - ./mysql/.env
+    volumes:
+      - type: volume
+        source: member_link_mysql
+        target: /var/lib/mysql
+    networks:
+      - member_link_network
+
+volumes:
+  member_link_mysql:
+    name: member_link_mysql
+
+networks:
+  member_link_network:
+    external: true
+
+
